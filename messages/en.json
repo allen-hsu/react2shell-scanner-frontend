@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "title": "React2Shell Scanner - CVE-2025-55182 & CVE-2025-66478 Detector",
+    "description": "Detect critical RCE vulnerabilities in Next.js applications"
+  },
+  "header": {
+    "title": "React2Shell Scanner",
+    "subtitle": "CVE-2025-55182 & CVE-2025-66478 Detection Tool"
+  },
+  "form": {
+    "targetUrl": "Target URL",
+    "placeholder": "https://example.com",
+    "scanMode": "Scan Mode",
+    "rce": "RCE PoC",
+    "rceDesc": "Execute harmless calculation",
+    "safe": "Safe Check",
+    "safeDesc": "Side-channel detection",
+    "vercelBypass": "Vercel Bypass",
+    "vercelBypassDesc": "Vercel WAF bypass",
+    "pathsToTest": "Paths to Test",
+    "pathsPlaceholder": "/, /_next, /api",
+    "pathsHint": "Comma-separated list of paths",
+    "wafBypass": "WAF Bypass (128KB junk)",
+    "windowsTarget": "Windows Target (PowerShell)",
+    "startScan": "Start Scan",
+    "scanning": "Scanning..."
+  },
+  "result": {
+    "title": "Scan Result",
+    "vulnerable": "VULNERABLE",
+    "notVulnerable": "NOT VULNERABLE",
+    "error": "ERROR",
+    "host": "Host",
+    "testedUrl": "Tested URL",
+    "finalUrl": "Final URL (after redirect)",
+    "timestamp": "Timestamp",
+    "errorLabel": "Error"
+  },
+  "about": {
+    "title": "About the Vulnerabilities",
+    "description1": "CVE-2025-55182 & CVE-2025-66478 are critical Remote Code Execution (RCE) vulnerabilities in Next.js applications using React Server Components (RSC).",
+    "description2": "The scanner sends a crafted multipart POST request that exploits the serialization mechanism. Vulnerable servers execute a harmless mathematical operation (41*271=11111) and return the result in the response header.",
+    "warning": "This tool is for authorized security testing only. Always obtain proper authorization before scanning any systems."
+  },
+  "footer": {
+    "credit": "Based on research from Assetnote Security Research Team",
+    "scannerCli": "Scanner (CLI)",
+    "frontend": "Frontend",
+    "backend": "Backend"
+  }
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { usePathname, useRouter } from "next/navigation";
 
 type ScanMode = "rce" | "safe" | "vercel-bypass";
 
@@ -17,6 +19,10 @@ interface ScanResult {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function Home() {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const router = useRouter();
+
   const [host, setHost] = useState("");
   const [mode, setMode] = useState<ScanMode>("rce");
   const [paths, setPaths] = useState("/");
@@ -25,6 +31,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const currentLocale = pathname.split("/")[1] || "en";
+
+  const switchLocale = (newLocale: string) => {
+    const newPath = pathname.replace(`/${currentLocale}`, `/${newLocale}`);
+    router.push(newPath);
+  };
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,11 +84,36 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* Header */}
       <header className="border-b border-zinc-800 px-6 py-4">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-bold text-red-500">React2Shell Scanner</h1>
-          <p className="text-sm text-zinc-400">
-            CVE-2025-55182 & CVE-2025-66478 Detection Tool
-          </p>
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-red-500">
+              {t("header.title")}
+            </h1>
+            <p className="text-sm text-zinc-400">{t("header.subtitle")}</p>
+          </div>
+          {/* Language Switcher */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => switchLocale("en")}
+              className={`rounded px-3 py-1 text-sm transition-colors ${
+                currentLocale === "en"
+                  ? "bg-red-600 text-white"
+                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => switchLocale("zh")}
+              className={`rounded px-3 py-1 text-sm transition-colors ${
+                currentLocale === "zh"
+                  ? "bg-red-600 text-white"
+                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+              }`}
+            >
+              中文
+            </button>
+          </div>
         </div>
       </header>
 
@@ -84,15 +122,18 @@ export default function Home() {
         <form onSubmit={handleScan} className="space-y-6">
           {/* Host Input */}
           <div>
-            <label htmlFor="host" className="block text-sm font-medium text-zinc-300">
-              Target URL
+            <label
+              htmlFor="host"
+              className="block text-sm font-medium text-zinc-300"
+            >
+              {t("form.targetUrl")}
             </label>
             <input
               type="text"
               id="host"
               value={host}
               onChange={(e) => setHost(e.target.value)}
-              placeholder="https://example.com"
+              placeholder={t("form.placeholder")}
               required
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
             />
@@ -100,12 +141,26 @@ export default function Home() {
 
           {/* Scan Mode */}
           <div>
-            <label className="block text-sm font-medium text-zinc-300">Scan Mode</label>
-            <div className="mt-2 flex gap-4">
+            <label className="block text-sm font-medium text-zinc-300">
+              {t("form.scanMode")}
+            </label>
+            <div className="mt-2 flex flex-wrap gap-4">
               {[
-                { value: "rce", label: "RCE PoC", desc: "Execute harmless calculation" },
-                { value: "safe", label: "Safe Check", desc: "Side-channel detection" },
-                { value: "vercel-bypass", label: "Vercel Bypass", desc: "Vercel WAF bypass" },
+                {
+                  value: "rce",
+                  label: t("form.rce"),
+                  desc: t("form.rceDesc"),
+                },
+                {
+                  value: "safe",
+                  label: t("form.safe"),
+                  desc: t("form.safeDesc"),
+                },
+                {
+                  value: "vercel-bypass",
+                  label: t("form.vercelBypass"),
+                  desc: t("form.vercelBypassDesc"),
+                },
               ].map((option) => (
                 <label
                   key={option.value}
@@ -132,18 +187,21 @@ export default function Home() {
 
           {/* Paths Input */}
           <div>
-            <label htmlFor="paths" className="block text-sm font-medium text-zinc-300">
-              Paths to Test
+            <label
+              htmlFor="paths"
+              className="block text-sm font-medium text-zinc-300"
+            >
+              {t("form.pathsToTest")}
             </label>
             <input
               type="text"
               id="paths"
               value={paths}
               onChange={(e) => setPaths(e.target.value)}
-              placeholder="/, /_next, /api"
+              placeholder={t("form.pathsPlaceholder")}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
             />
-            <p className="mt-1 text-xs text-zinc-500">Comma-separated list of paths</p>
+            <p className="mt-1 text-xs text-zinc-500">{t("form.pathsHint")}</p>
           </div>
 
           {/* Options */}
@@ -155,7 +213,7 @@ export default function Home() {
                 onChange={(e) => setWafBypass(e.target.checked)}
                 className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-red-500 focus:ring-red-500"
               />
-              <span className="text-sm text-zinc-300">WAF Bypass (128KB junk)</span>
+              <span className="text-sm text-zinc-300">{t("form.wafBypass")}</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -164,7 +222,9 @@ export default function Home() {
                 onChange={(e) => setWindows(e.target.checked)}
                 className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-red-500 focus:ring-red-500"
               />
-              <span className="text-sm text-zinc-300">Windows Target (PowerShell)</span>
+              <span className="text-sm text-zinc-300">
+                {t("form.windowsTarget")}
+              </span>
             </label>
           </div>
 
@@ -192,10 +252,10 @@ export default function Home() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Scanning...
+                {t("form.scanning")}
               </span>
             ) : (
-              "Start Scan"
+              t("form.startScan")
             )}
           </button>
         </form>
@@ -210,14 +270,14 @@ export default function Home() {
         {/* Result Display */}
         {result && (
           <div className="mt-8 space-y-4">
-            <h2 className="text-lg font-semibold">Scan Result</h2>
+            <h2 className="text-lg font-semibold">{t("result.title")}</h2>
             <div
               className={`rounded-lg border p-6 ${
                 result.vulnerable === true
                   ? "border-red-600 bg-red-900/20"
                   : result.vulnerable === false
-                    ? "border-green-600 bg-green-900/20"
-                    : "border-yellow-600 bg-yellow-900/20"
+                  ? "border-green-600 bg-green-900/20"
+                  : "border-yellow-600 bg-yellow-900/20"
               }`}
             >
               {/* Status Badge */}
@@ -227,48 +287,47 @@ export default function Home() {
                     result.vulnerable === true
                       ? "bg-red-600 text-white"
                       : result.vulnerable === false
-                        ? "bg-green-600 text-white"
-                        : "bg-yellow-600 text-white"
+                      ? "bg-green-600 text-white"
+                      : "bg-yellow-600 text-white"
                   }`}
                 >
                   {result.vulnerable === true
-                    ? "VULNERABLE"
+                    ? t("result.vulnerable")
                     : result.vulnerable === false
-                      ? "NOT VULNERABLE"
-                      : "ERROR"}
+                    ? t("result.notVulnerable")
+                    : t("result.error")}
                 </span>
-                {result.status_code && (
-                  <span className="text-sm text-zinc-400">
-                    HTTP {result.status_code}
-                  </span>
-                )}
               </div>
 
               {/* Details */}
               <dl className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                 <div>
-                  <dt className="text-zinc-500">Host</dt>
+                  <dt className="text-zinc-500">{t("result.host")}</dt>
                   <dd className="font-mono text-zinc-200">{result.host}</dd>
                 </div>
                 <div>
-                  <dt className="text-zinc-500">Tested URL</dt>
-                  <dd className="font-mono text-zinc-200">{result.tested_url}</dd>
+                  <dt className="text-zinc-500">{t("result.testedUrl")}</dt>
+                  <dd className="font-mono text-zinc-200">
+                    {result.tested_url}
+                  </dd>
                 </div>
                 {result.final_url && result.final_url !== result.tested_url && (
                   <div>
-                    <dt className="text-zinc-500">Final URL (after redirect)</dt>
-                    <dd className="font-mono text-zinc-200">{result.final_url}</dd>
+                    <dt className="text-zinc-500">{t("result.finalUrl")}</dt>
+                    <dd className="font-mono text-zinc-200">
+                      {result.final_url}
+                    </dd>
                   </div>
                 )}
                 <div>
-                  <dt className="text-zinc-500">Timestamp</dt>
+                  <dt className="text-zinc-500">{t("result.timestamp")}</dt>
                   <dd className="text-zinc-200">
                     {new Date(result.timestamp).toLocaleString()}
                   </dd>
                 </div>
                 {result.error && (
                   <div className="md:col-span-2">
-                    <dt className="text-zinc-500">Error</dt>
+                    <dt className="text-zinc-500">{t("result.errorLabel")}</dt>
                     <dd className="text-yellow-400">{result.error}</dd>
                   </div>
                 )}
@@ -279,41 +338,62 @@ export default function Home() {
 
         {/* CVE Info */}
         <div className="mt-12 rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <h3 className="text-lg font-semibold text-zinc-200">About the Vulnerabilities</h3>
+          <h3 className="text-lg font-semibold text-zinc-200">
+            {t("about.title")}
+          </h3>
           <div className="mt-4 space-y-3 text-sm text-zinc-400">
             <p>
-              <strong className="text-zinc-300">CVE-2025-55182 & CVE-2025-66478</strong> are
-              critical Remote Code Execution (RCE) vulnerabilities in Next.js applications
-              using React Server Components (RSC).
+              <strong className="text-zinc-300">
+                CVE-2025-55182 & CVE-2025-66478
+              </strong>{" "}
+              {t("about.description1")}
             </p>
-            <p>
-              The scanner sends a crafted multipart POST request that exploits the
-              serialization mechanism. Vulnerable servers execute a harmless mathematical
-              operation (<code className="rounded bg-zinc-800 px-1">41*271=11111</code>) and
-              return the result in the response header.
-            </p>
-            <p className="text-yellow-500">
-              This tool is for authorized security testing only. Always obtain proper
-              authorization before scanning any systems.
-            </p>
+            <p>{t("about.description2")}</p>
+            <p className="text-yellow-500">{t("about.warning")}</p>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800 px-6 py-4 text-center text-sm text-zinc-500">
-        <p>Based on research from Assetnote Security Research Team</p>
-        <p className="mt-1">
-          Scanner:{" "}
+      <footer className="border-t border-zinc-800 px-6 py-8 text-center text-sm text-zinc-500">
+        <p>{t("footer.credit")}</p>
+
+        {/* GitHub Links */}
+        <div className="mt-4 flex flex-wrap justify-center gap-4">
           <a
             href="https://github.com/assetnote/react2shell-scanner"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-400 hover:text-white underline"
+            className="flex items-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-zinc-400 transition-colors hover:border-zinc-500 hover:text-white"
           >
-            github.com/assetnote/react2shell-scanner
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            {t("footer.scannerCli")}
           </a>
-        </p>
+          <a
+            href="https://github.com/allen-hsu/react2shell-scanner-frontend"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-zinc-400 transition-colors hover:border-zinc-500 hover:text-white"
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            {t("footer.frontend")}
+          </a>
+          <a
+            href="https://github.com/allen-hsu/react2shell-scanner-backend"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-zinc-400 transition-colors hover:border-zinc-500 hover:text-white"
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            {t("footer.backend")}
+          </a>
+        </div>
       </footer>
     </div>
   );

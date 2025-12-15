@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "title": "React2Shell 掃描器 - CVE-2025-55182 & CVE-2025-66478 檢測工具",
+    "description": "檢測 Next.js 應用程式中的嚴重 RCE 漏洞"
+  },
+  "header": {
+    "title": "React2Shell 掃描器",
+    "subtitle": "CVE-2025-55182 & CVE-2025-66478 檢測工具"
+  },
+  "form": {
+    "targetUrl": "目標網址",
+    "placeholder": "https://example.com",
+    "scanMode": "掃描模式",
+    "rce": "RCE PoC",
+    "rceDesc": "執行無害計算",
+    "safe": "安全檢測",
+    "safeDesc": "側信道檢測",
+    "vercelBypass": "Vercel 繞過",
+    "vercelBypassDesc": "Vercel WAF 繞過",
+    "pathsToTest": "測試路徑",
+    "pathsPlaceholder": "/, /_next, /api",
+    "pathsHint": "以逗號分隔的路徑列表",
+    "wafBypass": "WAF 繞過 (128KB 垃圾資料)",
+    "windowsTarget": "Windows 目標 (PowerShell)",
+    "startScan": "開始掃描",
+    "scanning": "掃描中..."
+  },
+  "result": {
+    "title": "掃描結果",
+    "vulnerable": "存在漏洞",
+    "notVulnerable": "無漏洞",
+    "error": "錯誤",
+    "host": "主機",
+    "testedUrl": "測試網址",
+    "finalUrl": "最終網址（重導向後）",
+    "timestamp": "時間戳記",
+    "errorLabel": "錯誤"
+  },
+  "about": {
+    "title": "關於漏洞",
+    "description1": "CVE-2025-55182 和 CVE-2025-66478 是 Next.js 應用程式中使用 React Server Components (RSC) 的嚴重遠端程式碼執行 (RCE) 漏洞。",
+    "description2": "掃描器發送特製的 multipart POST 請求來利用序列化機制。有漏洞的伺服器會執行無害的數學運算 (41*271=11111) 並在回應標頭中返回結果。",
+    "warning": "此工具僅供授權安全測試使用。在掃描任何系統之前，請務必取得適當授權。"
+  },
+  "footer": {
+    "credit": "基於 Assetnote 安全研究團隊的研究",
+    "scannerCli": "掃描器 (CLI)",
+    "frontend": "前端",
+    "backend": "後端"
+  }
+}
